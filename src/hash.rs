@@ -2,11 +2,13 @@
 #[path = "hash_test.rs"]
 mod hash_test;
 
+use serde::{Deserialize, Serialize};
+use starknet_crypto::FieldElement;
+use starknet_types_core::felt::Felt;
+use starknet_types_core::hash::Pedersen as TypeRsPedersen;
+use starknet_types_core::hash::StarkHash as Sh;
 use std::fmt::{Debug, Display};
 use std::io::Error;
-
-use serde::{Deserialize, Serialize};
-use starknet_crypto::{pedersen_hash as starknet_crypto_pedersen_hash, FieldElement};
 
 use crate::serde_utils::{bytes_from_hex_str, hex_str_from_bytes, BytesAsHex, PrefixedBytesAsHex};
 use crate::{impl_from_through_intermediate, StarknetApiError};
@@ -25,10 +27,7 @@ pub type StarkHash = StarkFelt;
 /// Computes Pedersen hash using STARK curve on two elements, as defined
 /// in <https://docs.starknet.io/documentation/architecture_and_concepts/Hashing/hash-functions/#pedersen_hash.>
 pub fn pedersen_hash(felt0: &StarkFelt, felt1: &StarkFelt) -> StarkHash {
-    StarkFelt::from(starknet_crypto_pedersen_hash(
-        &FieldElement::from(*felt0),
-        &FieldElement::from(*felt1),
-    ))
+    StarkFelt::from(TypeRsPedersen::hash(&Felt::from(*felt0), &Felt::from(*felt1)))
 }
 
 /// Computes Pedersen hash using STARK curve on an array of elements, as defined
@@ -184,6 +183,20 @@ impl From<FieldElement> for StarkFelt {
 }
 
 impl From<StarkFelt> for FieldElement {
+    fn from(felt: StarkFelt) -> Self {
+        // Should not fail.
+        Self::from_bytes_be(&felt.0).expect("Convert StarkFelf to FieldElement.")
+    }
+}
+
+impl From<Felt> for StarkFelt {
+    fn from(fe: Felt) -> Self {
+        // Should not fail.
+        Self::new(fe.to_bytes_be()).expect("Convert FieldElement to StarkFelt.")
+    }
+}
+
+impl From<StarkFelt> for Felt {
     fn from(felt: StarkFelt) -> Self {
         // Should not fail.
         Self::from_bytes_be(&felt.0).expect("Convert StarkFelf to FieldElement.")
