@@ -23,6 +23,11 @@ starknet-crypto = "0.5.1"
 strum = "0.24.1"
 strum_macros = "0.24.3"
 thiserror = "1.0.31"
+starknet-types-core = {git = "https://github.com/starknet-io/types-rs.git", rev = "dd453482cb6516ac36fcafb2d55ebf455aee9f64", default-features = false, features = [    "alloc",
+    "arbitrary",
+    "serde",
+    "curve",
+    "hash"]}
 
 [dev-dependencies]
 assert_matches = "1.5.0"
