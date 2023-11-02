@@ -27,6 +27,19 @@ fn pedersen_hash_array_correctness() {
 }
 
 #[test]
+fn felt_serde() {
+    let felts = [
+        stark_felt!("0x123"),
+        stark_felt!("0xabf"),
+        stark_felt!("0x24ba891239123"),
+        stark_felt!("0xffff"),
+    ];
+    let serde_string = serde_json::to_string(&felts).unwrap();
+    let deserilize: [StarkFelt; 4] = serde_json::from_str(&serde_string).unwrap();
+    assert_eq!(felts, deserilize);
+}
+
+#[test]
 fn hash_macro() {
     assert_eq!(
         stark_felt!("0x123"),
