@@ -145,7 +145,7 @@ pub struct Nonce(pub Felt);
 
 impl Nonce {
     pub fn try_increment(&self) -> Result<Self, StarknetApiError> {
-        let incremented_felt = Felt::from(self.0) + Felt::ONE;
+        let incremented_felt = self.0 + Felt::ONE;
 
         // Check if an overflow occurred during increment.
         if incremented_felt == Felt::ZERO {
