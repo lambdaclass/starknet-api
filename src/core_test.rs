@@ -1,5 +1,4 @@
 use assert_matches::assert_matches;
-use starknet_crypto::FieldElement;
 use starknet_types_core::felt::Felt;
 
 use crate::core::{
@@ -80,7 +79,7 @@ fn eth_address_serde() {
 #[test]
 fn nonce_overflow() {
     // Increment on this value should overflow back to 0.
-    let max_nonce = Nonce(StarkFelt::from(FieldElement::MAX));
+    let max_nonce = Nonce(Felt::MAX);
 
     let overflowed_nonce = max_nonce.try_increment();
     assert_matches!(overflowed_nonce, Err(StarknetApiError::OutOfRange { string: _err_str }));

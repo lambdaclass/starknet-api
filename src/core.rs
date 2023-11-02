@@ -8,7 +8,6 @@ use derive_more::Display;
 use once_cell::sync::Lazy;
 use primitive_types::H160;
 use serde::{Deserialize, Serialize};
-use starknet_crypto::FieldElement;
 use starknet_types_core::felt::{Felt, NonZeroFelt};
 use starknet_types_core::hash::{Pedersen, StarkHash as Sh};
 
@@ -142,17 +141,18 @@ pub struct CompiledClassHash(pub StarkHash);
     Ord,
     derive_more::Deref,
 )]
-pub struct Nonce(pub StarkFelt);
+pub struct Nonce(pub Felt);
 
 impl Nonce {
     pub fn try_increment(&self) -> Result<Self, StarknetApiError> {
-        let current_nonce = FieldElement::from(self.0);
+        let incremented_felt = Felt::from(self.0) + Felt::ONE;
 
         // Check if an overflow occurred during increment.
-        match StarkFelt::from(current_nonce + FieldElement::ONE) {
-            StarkFelt::ZERO => Err(StarknetApiError::OutOfRange { string: format!("{:?}", self) }),
-            incremented_felt => Ok(Self(incremented_felt)),
-        }
+        if incremented_felt == Felt::ZERO {
+            return Err(StarknetApiError::OutOfRange { string: format!("{:?}", self) });
+        };
+
+        Ok(Nonce(incremented_felt))
     }
 }
 
