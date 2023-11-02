@@ -9,6 +9,8 @@ use once_cell::sync::Lazy;
 use primitive_types::H160;
 use serde::{Deserialize, Serialize};
 use starknet_crypto::FieldElement;
+use starknet_types_core::felt::{Felt, NonZeroFelt};
+use starknet_types_core::hash::{Pedersen, StarkHash as Sh};
 
 use crate::hash::{pedersen_hash_array, StarkFelt, StarkHash};
 use crate::serde_utils::{BytesAsHex, PrefixedBytesAsHex};
@@ -55,8 +57,10 @@ pub static CONTRACT_ADDRESS_DOMAIN_SIZE: Lazy<StarkFelt> = Lazy::new(|| {
         .unwrap_or_else(|_| panic!("Failed to convert {PATRICIA_KEY_UPPER_BOUND} to StarkFelt"))
 });
 /// The address upper bound; it is defined to be congruent with the storage var address upper bound.
-pub static L2_ADDRESS_UPPER_BOUND: Lazy<FieldElement> = Lazy::new(|| {
-    FieldElement::from(*CONTRACT_ADDRESS_DOMAIN_SIZE) - FieldElement::from(MAX_STORAGE_ITEM_SIZE)
+pub static L2_ADDRESS_UPPER_BOUND: Lazy<NonZeroFelt> = Lazy::new(|| {
+    (Felt::from(*CONTRACT_ADDRESS_DOMAIN_SIZE) - Felt::from(MAX_STORAGE_ITEM_SIZE))
+        .try_into()
+        .unwrap()
 });
 
 impl TryFrom<StarkHash> for ContractAddress {
@@ -75,14 +79,16 @@ pub fn calculate_contract_address(
 ) -> Result<ContractAddress, StarknetApiError> {
     let constructor_calldata_hash = pedersen_hash_array(&constructor_calldata.0);
     let contract_address_prefix = format!("0x{}", hex::encode(CONTRACT_ADDRESS_PREFIX));
-    let mut address = FieldElement::from(pedersen_hash_array(&[
-        StarkFelt::try_from(contract_address_prefix.as_str())?,
-        *deployer_address.0.key(),
-        salt.0,
-        class_hash.0,
-        constructor_calldata_hash,
-    ]));
-    address = address % *L2_ADDRESS_UPPER_BOUND;
+    let mut address = Pedersen::hash_array(&[
+        // TODO, remove unwrap()
+        Felt::from_hex(contract_address_prefix.as_str()).unwrap(),
+        // TODO, correct this
+        Felt::from_bytes_be(deployer_address.0.key().bytes()).unwrap(),
+        salt.0.into(),
+        class_hash.0.into(),
+        constructor_calldata_hash.into(),
+    ]);
+    address = address.mod_floor(&L2_ADDRESS_UPPER_BOUND);
 
     ContractAddress::try_from(StarkFelt::from(address))
 }

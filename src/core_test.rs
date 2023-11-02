@@ -1,5 +1,6 @@
 use assert_matches::assert_matches;
 use starknet_crypto::FieldElement;
+use starknet_types_core::felt::Felt;
 
 use crate::core::{
     calculate_contract_address, ClassHash, ContractAddress, EthAddress, Nonce, PatriciaKey,
@@ -45,7 +46,7 @@ fn test_calculate_contract_address() {
     let class_hash = class_hash!("0x110");
     let deployer_address = ContractAddress::default();
     let constructor_calldata =
-        Calldata(vec![stark_felt!(60_u16), stark_felt!(70_u16), FieldElement::MAX.into()].into());
+        Calldata(vec![stark_felt!(60_u16), stark_felt!(70_u16), Felt::MAX.into()].into());
 
     let actual_address =
         calculate_contract_address(salt, class_hash, &constructor_calldata, deployer_address)
@@ -60,7 +61,7 @@ fn test_calculate_contract_address() {
         class_hash.0,
         constructor_calldata_hash,
     ]);
-    let mod_address = FieldElement::from(address) % *L2_ADDRESS_UPPER_BOUND;
+    let mod_address = Felt::from(address).mod_floor(&L2_ADDRESS_UPPER_BOUND);
     let expected_address = ContractAddress::try_from(StarkFelt::from(mod_address)).unwrap();
 
     assert_eq!(actual_address, expected_address);
