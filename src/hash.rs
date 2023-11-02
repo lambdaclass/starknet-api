@@ -3,7 +3,6 @@
 mod hash_test;
 
 use serde::{Deserialize, Serialize};
-use starknet_crypto::FieldElement;
 use starknet_types_core::felt::Felt;
 use starknet_types_core::hash::Pedersen as TypeRsPedersen;
 use starknet_types_core::hash::StarkHash as Sh;
@@ -175,31 +174,17 @@ impl From<u128> for StarkFelt {
 
 impl_from_through_intermediate!(u128, StarkFelt, u8, u16, u32, u64);
 
-impl From<FieldElement> for StarkFelt {
-    fn from(fe: FieldElement) -> Self {
-        // Should not fail.
-        Self::new(fe.to_bytes_be()).expect("Convert FieldElement to StarkFelt.")
-    }
-}
-
-impl From<StarkFelt> for FieldElement {
-    fn from(felt: StarkFelt) -> Self {
-        // Should not fail.
-        Self::from_bytes_be(&felt.0).expect("Convert StarkFelf to FieldElement.")
-    }
-}
-
 impl From<Felt> for StarkFelt {
     fn from(fe: Felt) -> Self {
         // Should not fail.
-        Self::new(fe.to_bytes_be()).expect("Convert FieldElement to StarkFelt.")
+        Self::new(fe.to_bytes_be()).expect("Convert Felt to StarkFelt.")
     }
 }
 
 impl From<StarkFelt> for Felt {
     fn from(felt: StarkFelt) -> Self {
         // Should not fail.
-        Self::from_bytes_be(&felt.0).expect("Convert StarkFelf to FieldElement.")
+        Self::from_bytes_be(&felt.0).expect("Convert StarkFelf to Felt.")
     }
 }
 
