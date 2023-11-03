@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use starknet_types_core::felt::{Felt, NonZeroFelt};
 use starknet_types_core::hash::{Pedersen, StarkHash as Sh};
 
-use crate::hash::{pedersen_hash_array, StarkFelt, StarkHash};
+use crate::hash::{pedersen_hash_array, StarkHash};
 use crate::serde_utils::{BytesAsHex, PrefixedBytesAsHex};
 use crate::transaction::{Calldata, ContractAddressSalt};
 use crate::{impl_from_through_intermediate, StarknetApiError};
@@ -51,9 +51,9 @@ pub const MAX_STORAGE_ITEM_SIZE: u16 = 256;
 /// The prefix used in the calculation of a contract address.
 pub const CONTRACT_ADDRESS_PREFIX: &str = "STARKNET_CONTRACT_ADDRESS";
 /// The size of the contract address domain.
-pub static CONTRACT_ADDRESS_DOMAIN_SIZE: Lazy<StarkFelt> = Lazy::new(|| {
-    StarkFelt::try_from(PATRICIA_KEY_UPPER_BOUND)
-        .unwrap_or_else(|_| panic!("Failed to convert {PATRICIA_KEY_UPPER_BOUND} to StarkFelt"))
+pub static CONTRACT_ADDRESS_DOMAIN_SIZE: Lazy<Felt> = Lazy::new(|| {
+    Felt::from_hex(PATRICIA_KEY_UPPER_BOUND)
+        .unwrap_or_else(|_| panic!("Failed to convert {PATRICIA_KEY_UPPER_BOUND} to Felt"))
 });
 /// The address upper bound; it is defined to be congruent with the storage var address upper bound.
 pub static L2_ADDRESS_UPPER_BOUND: Lazy<NonZeroFelt> = Lazy::new(|| {
@@ -81,15 +81,14 @@ pub fn calculate_contract_address(
     let mut address = Pedersen::hash_array(&[
         // TODO, remove unwrap()
         Felt::from_hex(contract_address_prefix.as_str()).unwrap(),
-        // TODO, correct this
-        Felt::from_bytes_be(deployer_address.0.key().bytes()).unwrap(),
+        *deployer_address.0.key(),
         salt.0.into(),
         class_hash.0.into(),
         constructor_calldata_hash.into(),
     ]);
     address = address.mod_floor(&L2_ADDRESS_UPPER_BOUND);
 
-    ContractAddress::try_from(StarkFelt::from(address))
+    ContractAddress::try_from(address)
 }
 
 /// The hash of a ContractClass.
@@ -197,7 +196,7 @@ impl PatriciaKey {
 
 impl From<u128> for PatriciaKey {
     fn from(val: u128) -> Self {
-        PatriciaKey::try_from(StarkFelt::from(val)).expect("Failed to convert u128 to PatriciaKey.")
+        PatriciaKey::try_from(Felt::from(val)).expect("Failed to convert u128 to PatriciaKey.")
     }
 }
 
@@ -220,24 +219,6 @@ impl Debug for PatriciaKey {
     }
 }
 
-/// A utility macro to create a [`PatriciaKey`] from a hex string / unsigned integer representation.
-#[cfg(any(feature = "testing", test))]
-#[macro_export]
-macro_rules! patricia_key {
-    ($s:expr) => {
-        PatriciaKey::try_from(StarkHash::try_from($s).unwrap()).unwrap()
-    };
-}
-
-/// A utility macro to create a [`ClassHash`] from a hex string / unsigned integer representation.
-#[cfg(any(feature = "testing", test))]
-#[macro_export]
-macro_rules! class_hash {
-    ($s:expr) => {
-        ClassHash(StarkHash::try_from($s).unwrap())
-    };
-}
-
 /// A utility macro to create a [`ContractAddress`] from a hex string / unsigned integer
 /// representation.
 #[cfg(any(feature = "testing", test))]
@@ -255,12 +236,15 @@ macro_rules! contract_address {
 #[serde(try_from = "PrefixedBytesAsHex<20_usize>", into = "PrefixedBytesAsHex<20_usize>")]
 pub struct EthAddress(pub H160);
 
-impl TryFrom<StarkFelt> for EthAddress {
+//TODO, check this
+impl TryFrom<Felt> for EthAddress {
     type Error = StarknetApiError;
-    fn try_from(felt: StarkFelt) -> Result<Self, Self::Error> {
-        const COMPLIMENT_OF_H160: usize = std::mem::size_of::<StarkFelt>() - H160::len_bytes();
+    fn try_from(felt: Felt) -> Result<Self, Self::Error> {
+        const COMPLIMENT_OF_H160: usize = std::mem::size_of::<Felt>() - H160::len_bytes();
 
-        let (rest, h160_bytes) = felt.bytes().split_at(COMPLIMENT_OF_H160);
+        let binding = felt.to_bytes_be();
+        let (rest, h160_bytes) = binding.split_at(COMPLIMENT_OF_H160);
+
         if rest != [0u8; COMPLIMENT_OF_H160] {
             return Err(StarknetApiError::OutOfRange { string: felt.to_string() });
         }

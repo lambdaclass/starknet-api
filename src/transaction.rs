@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use derive_more::From;
 use serde::{Deserialize, Serialize};
+use starknet_types_core::felt::Felt;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
@@ -12,7 +13,7 @@ use crate::core::{
     ClassHash, CompiledClassHash, ContractAddress, EntryPointSelector, EthAddress, Nonce,
 };
 use crate::data_availability::DataAvailabilityMode;
-use crate::hash::{StarkFelt, StarkHash};
+use crate::hash::StarkHash;
 use crate::serde_utils::PrefixedBytesAsHex;
 use crate::StarknetApiError;
 
@@ -394,7 +395,7 @@ impl From<Fee> for PrefixedBytesAsHex<16_usize> {
     }
 }
 
-impl From<Fee> for StarkFelt {
+impl From<Fee> for Felt {
     fn from(fee: Fee) -> Self {
         Self::from(fee.0)
     }
@@ -420,31 +421,31 @@ pub struct ContractAddressSalt(pub StarkHash);
 
 /// A transaction signature.
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash, Deserialize, Serialize, PartialOrd, Ord)]
-pub struct TransactionSignature(pub Vec<StarkFelt>);
+pub struct TransactionSignature(pub Vec<Felt>);
 
 /// A transaction version.
 #[derive(
     Debug, Copy, Clone, Default, Eq, PartialEq, Hash, Deserialize, Serialize, PartialOrd, Ord,
 )]
-pub struct TransactionVersion(pub StarkFelt);
+pub struct TransactionVersion(pub Felt);
 
 impl TransactionVersion {
     /// [TransactionVersion] constant that's equal to 0.
-    pub const ZERO: Self = { Self(StarkFelt::ZERO) };
+    pub const ZERO: Self = { Self(Felt::ZERO) };
 
     /// [TransactionVersion] constant that's equal to 1.
-    pub const ONE: Self = { Self(StarkFelt::ONE) };
+    pub const ONE: Self = { Self(Felt::ONE) };
 
     /// [TransactionVersion] constant that's equal to 2.
-    pub const TWO: Self = { Self(StarkFelt::TWO) };
+    pub const TWO: Self = { Self(Felt::TWO) };
 
     /// [TransactionVersion] constant that's equal to 3.
-    pub const THREE: Self = { Self(StarkFelt::THREE) };
+    pub const THREE: Self = { Self(Felt::THREE) };
 }
 
 /// The calldata of a transaction.
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash, Deserialize, Serialize, PartialOrd, Ord)]
-pub struct Calldata(pub Arc<Vec<StarkFelt>>);
+pub struct Calldata(pub Arc<Vec<Felt>>);
 
 #[macro_export]
 macro_rules! calldata {
@@ -470,11 +471,11 @@ pub struct MessageToL1 {
 
 /// The payload of [`MessageToL2`].
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash, Deserialize, Serialize, PartialOrd, Ord)]
-pub struct L1ToL2Payload(pub Vec<StarkFelt>);
+pub struct L1ToL2Payload(pub Vec<Felt>);
 
 /// The payload of [`MessageToL1`].
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash, Deserialize, Serialize, PartialOrd, Ord)]
-pub struct L2ToL1Payload(pub Vec<StarkFelt>);
+pub struct L2ToL1Payload(pub Vec<Felt>);
 
 /// An event.
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash, Deserialize, Serialize, PartialOrd, Ord)]
@@ -493,11 +494,11 @@ pub struct EventContent {
 
 /// An event key.
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash, Deserialize, Serialize, PartialOrd, Ord)]
-pub struct EventKey(pub StarkFelt);
+pub struct EventKey(pub Felt);
 
 /// An event data.
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash, Deserialize, Serialize, PartialOrd, Ord)]
-pub struct EventData(pub Vec<StarkFelt>);
+pub struct EventData(pub Vec<Felt>);
 
 /// The index of a transaction in [BlockBody](`crate::block::BlockBody`).
 #[derive(
@@ -530,7 +531,7 @@ impl From<Tip> for PrefixedBytesAsHex<8_usize> {
     }
 }
 
-impl From<Tip> for StarkFelt {
+impl From<Tip> for Felt {
     fn from(tip: Tip) -> Self {
         Self::from(tip.0)
     }
@@ -583,9 +584,9 @@ impl TryFrom<Vec<(Resource, ResourceBounds)>> for ResourceBoundsMapping {
 
 /// Paymaster-related data.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct PaymasterData(pub Vec<StarkFelt>);
+pub struct PaymasterData(pub Vec<Felt>);
 
 /// If nonempty, will contain the required data for deploying and initializing an account contract:
 /// its class hash, address salt and constructor calldata.
 #[derive(Debug, Clone, Default, Eq, PartialEq, Hash, Deserialize, Serialize, PartialOrd, Ord)]
-pub struct AccountDeploymentData(pub Vec<StarkFelt>);
+pub struct AccountDeploymentData(pub Vec<Felt>);
