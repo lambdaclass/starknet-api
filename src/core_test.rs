@@ -76,6 +76,12 @@ fn eth_address_serde() {
 }
 
 #[test]
+fn eth_address_from_felt() {
+    assert!(EthAddress::try_from(Felt::from_hex("0x13219abf123bc").unwrap()).is_ok());
+    assert!(EthAddress::try_from(Felt::MAX).is_err());
+}
+
+#[test]
 fn nonce_overflow() {
     // Increment on this value should overflow back to 0.
     let max_nonce = Nonce(Felt::MAX);

@@ -57,9 +57,7 @@ pub static CONTRACT_ADDRESS_DOMAIN_SIZE: Lazy<Felt> = Lazy::new(|| {
 });
 /// The address upper bound; it is defined to be congruent with the storage var address upper bound.
 pub static L2_ADDRESS_UPPER_BOUND: Lazy<NonZeroFelt> = Lazy::new(|| {
-    ((*CONTRACT_ADDRESS_DOMAIN_SIZE) - Felt::from(MAX_STORAGE_ITEM_SIZE))
-        .try_into()
-        .unwrap()
+    ((*CONTRACT_ADDRESS_DOMAIN_SIZE) - Felt::from(MAX_STORAGE_ITEM_SIZE)).try_into().unwrap()
 });
 
 impl TryFrom<StarkHash> for ContractAddress {
@@ -236,7 +234,6 @@ macro_rules! contract_address {
 #[serde(try_from = "PrefixedBytesAsHex<20_usize>", into = "PrefixedBytesAsHex<20_usize>")]
 pub struct EthAddress(pub H160);
 
-//TODO, check this
 impl TryFrom<Felt> for EthAddress {
     type Error = StarknetApiError;
     fn try_from(felt: Felt) -> Result<Self, Self::Error> {
