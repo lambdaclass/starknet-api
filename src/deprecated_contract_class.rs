@@ -130,9 +130,9 @@ impl TryFrom<CasmContractEntryPoint> for EntryPoint {
 
     fn try_from(value: CasmContractEntryPoint) -> Result<Self, Self::Error> {
         Ok(EntryPoint {
-            // TODO, Remove unwrap() and check possible overflow
             selector: EntryPointSelector(
-                Felt::from_hex(value.selector.to_str_radix(16).as_str()).unwrap(),
+                Felt::from_hex(value.selector.to_str_radix(16).as_str())?,
+
             ),
             offset: EntryPointOffset(value.offset),
         })
