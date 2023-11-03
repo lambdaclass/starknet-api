@@ -3,7 +3,7 @@ use starknet_types_core::felt::Felt;
 
 use crate::core::{
     calculate_contract_address, ClassHash, ContractAddress, EthAddress, Nonce, PatriciaKey,
-    StarknetApiError, CONTRACT_ADDRESS_PREFIX, L2_ADDRESS_UPPER_BOUND,
+    StarknetApiError, CONTRACT_ADDRESS_PREFIX_FELT, L2_ADDRESS_UPPER_BOUND,
 };
 use crate::hash::pedersen_hash_array;
 use crate::transaction::{Calldata, ContractAddressSalt};
@@ -53,7 +53,7 @@ fn test_calculate_contract_address() {
 
     let constructor_calldata_hash = pedersen_hash_array(&constructor_calldata.0);
     let address = pedersen_hash_array(&[
-        Felt::from_hex(format!("0x{}", hex::encode(CONTRACT_ADDRESS_PREFIX)).as_str()).unwrap(),
+        *CONTRACT_ADDRESS_PREFIX_FELT,
         *deployer_address.0.key(),
         salt.0,
         class_hash.0,
@@ -62,6 +62,7 @@ fn test_calculate_contract_address() {
     let mod_address = address.mod_floor(&L2_ADDRESS_UPPER_BOUND);
     let expected_address = ContractAddress(PatriciaKey(mod_address));
 
+    dbg!(expected_address.0 .0.to_string());
     assert_eq!(actual_address, expected_address);
 }
 

@@ -51,6 +51,9 @@ pub const MAX_STORAGE_ITEM_SIZE: u16 = 256;
 /// The prefix used in the calculation of a contract address.
 pub const CONTRACT_ADDRESS_PREFIX: &str = "STARKNET_CONTRACT_ADDRESS";
 /// The size of the contract address domain.
+pub static CONTRACT_ADDRESS_PREFIX_FELT: Lazy<Felt> = Lazy::new(|| {
+    Felt::from_hex(format!("0x{}", hex::encode(CONTRACT_ADDRESS_PREFIX)).as_str()).unwrap()
+});
 pub static CONTRACT_ADDRESS_DOMAIN_SIZE: Lazy<Felt> = Lazy::new(|| {
     Felt::from_hex(PATRICIA_KEY_UPPER_BOUND)
         .unwrap_or_else(|_| panic!("Failed to convert {PATRICIA_KEY_UPPER_BOUND} to Felt"))
@@ -75,10 +78,8 @@ pub fn calculate_contract_address(
     deployer_address: ContractAddress,
 ) -> Result<ContractAddress, StarknetApiError> {
     let constructor_calldata_hash = pedersen_hash_array(&constructor_calldata.0);
-    let contract_address_prefix = format!("0x{}", hex::encode(CONTRACT_ADDRESS_PREFIX));
     let mut address = Pedersen::hash_array(&[
-        // TODO, remove unwrap()
-        Felt::from_hex(contract_address_prefix.as_str()).unwrap(),
+        *CONTRACT_ADDRESS_PREFIX_FELT,
         *deployer_address.0.key(),
         salt.0,
         class_hash.0,
