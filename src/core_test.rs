@@ -45,7 +45,7 @@ fn test_calculate_contract_address() {
     let class_hash = ClassHash(Felt::from_hex("0x110").unwrap());
     let deployer_address = ContractAddress::default();
     let constructor_calldata =
-        Calldata(vec![Felt::from(60_u16), Felt::from(70_u16), Felt::MAX.into()].into());
+        Calldata(vec![Felt::from(60_u16), Felt::from(70_u16), Felt::MAX].into());
 
     let actual_address =
         calculate_contract_address(salt, class_hash, &constructor_calldata, deployer_address)
@@ -59,7 +59,7 @@ fn test_calculate_contract_address() {
         class_hash.0,
         constructor_calldata_hash,
     ]);
-    let mod_address = Felt::from(address).mod_floor(&L2_ADDRESS_UPPER_BOUND);
+    let mod_address = address.mod_floor(&L2_ADDRESS_UPPER_BOUND);
     let expected_address = ContractAddress(PatriciaKey(mod_address));
 
     assert_eq!(actual_address, expected_address);

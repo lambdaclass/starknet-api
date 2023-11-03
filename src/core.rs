@@ -57,7 +57,7 @@ pub static CONTRACT_ADDRESS_DOMAIN_SIZE: Lazy<Felt> = Lazy::new(|| {
 });
 /// The address upper bound; it is defined to be congruent with the storage var address upper bound.
 pub static L2_ADDRESS_UPPER_BOUND: Lazy<NonZeroFelt> = Lazy::new(|| {
-    (Felt::from(*CONTRACT_ADDRESS_DOMAIN_SIZE) - Felt::from(MAX_STORAGE_ITEM_SIZE))
+    ((*CONTRACT_ADDRESS_DOMAIN_SIZE) - Felt::from(MAX_STORAGE_ITEM_SIZE))
         .try_into()
         .unwrap()
 });
@@ -82,9 +82,9 @@ pub fn calculate_contract_address(
         // TODO, remove unwrap()
         Felt::from_hex(contract_address_prefix.as_str()).unwrap(),
         *deployer_address.0.key(),
-        salt.0.into(),
-        class_hash.0.into(),
-        constructor_calldata_hash.into(),
+        salt.0,
+        class_hash.0,
+        constructor_calldata_hash,
     ]);
     address = address.mod_floor(&L2_ADDRESS_UPPER_BOUND);
 

@@ -89,9 +89,9 @@ fn fee_to_starkfelt() {
 fn felt_to_u64_and_back() {
     // Positive flow.
     let value = u64::MAX;
-    let felt = value.to_u64().unwrap();
-    let new_value: u64 = felt.try_into().unwrap();
-    assert_eq!(value, new_value);
+    let felt = Felt::from(value);
+    let new_value = felt.to_u64();
+    assert_eq!(Some(value), new_value);
 
     // Negative flow.
     let value: u128 = u128::from(u64::MAX) + 1;
