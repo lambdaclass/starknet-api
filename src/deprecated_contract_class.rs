@@ -130,10 +130,7 @@ impl TryFrom<CasmContractEntryPoint> for EntryPoint {
 
     fn try_from(value: CasmContractEntryPoint) -> Result<Self, Self::Error> {
         Ok(EntryPoint {
-            selector: EntryPointSelector(
-                Felt::from_hex(value.selector.to_str_radix(16).as_str())?,
-
-            ),
+            selector: EntryPointSelector(Felt::from_hex(value.selector.to_str_radix(16).as_str())?),
             offset: EntryPointOffset(value.offset),
         })
     }
@@ -181,4 +178,33 @@ where
     S: Serializer,
 {
     s.serialize_str(format!("{:#x}", value).as_str())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use num_bigint::BigUint;
+    use num_traits::Num;
+    #[test]
+    fn entry_point_from_casm_contract_entry_point() {
+        let casm_entry_point = CasmContractEntryPoint {
+            selector: BigUint::from_str_radix(
+                "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                16,
+            )
+            .unwrap(),
+            offset: 0,
+            builtins: Vec::new(),
+        };
+
+        let entry_point: EntryPoint = casm_entry_point.try_into().unwrap();
+
+        assert_eq!(
+            entry_point.selector,
+            EntryPointSelector(
+                Felt::from_hex("0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+                    .unwrap()
+            )
+        );
+    }
 }
