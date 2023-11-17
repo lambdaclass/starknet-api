@@ -1,9 +1,6 @@
 use crate::hash::{pedersen_hash, pedersen_hash_array};
 use crate::transaction::Fee;
 use num_traits::cast::ToPrimitive;
-// use crate::StarknetApiError;
-// use assert_matches::assert_matches;
-// use serde::{Serialize, Deserialize};
 use starknet_types_core::felt::Felt;
 
 #[test]
