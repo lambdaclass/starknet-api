@@ -9,10 +9,6 @@ use starknet_types_core::hash::StarkHash as Sh;
 /// Genesis state hash.
 pub const GENESIS_HASH: &str = "0x0";
 
-// Felt encoding constants.
-// const CHOOSER_FULL: u8 = 15;
-// const CHOOSER_HALF: u8 = 14;
-
 /// An alias for [`StarkFelt`].
 /// The output of the [Pedersen hash](https://docs.starknet.io/documentation/architecture_and_concepts/Hashing/hash-functions/#pedersen_hash).
 pub type StarkHash = Felt;
