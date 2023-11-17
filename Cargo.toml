@@ -23,10 +23,9 @@ strum = "0.24.1"
 strum_macros = "0.24.3"
 thiserror = "1.0.31"
 starknet-types-core = {git = "https://github.com/starknet-io/types-rs.git", rev = "ac055e3d961e4bbc931a849fb02b0c9295a2cc0e", default-features = false, features = [    "alloc",
-    "arbitrary",
     "serde",
-    "curve",
-    "hash"]}
+    "hash",
+    "std"]}
 
 [dev-dependencies]
 num-bigint = "0.4.4"
