@@ -15,6 +15,7 @@ pub mod type_utils;
 use std::num::ParseIntError;
 
 use serde_utils::InnerDeserializationError;
+use starknet_types_core::felt::FromStrError;
 
 /// The error type returned by StarknetApi.
 #[derive(thiserror::Error, Clone, Debug)]
@@ -28,6 +29,8 @@ pub enum StarknetApiError {
     /// Error when serializing into number.
     #[error(transparent)]
     ParseIntError(#[from] ParseIntError),
+    #[error(transparent)]
+    FromStrError(#[from] FromStrError),
     /// Missing resource type / duplicated resource type.
     #[error("Missing resource type / duplicated resource type; got {0}.")]
     InvalidResourceMappingInitializer(String),
